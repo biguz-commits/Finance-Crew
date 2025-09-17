@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "Finance crew"
+version = "0.1.0"
+description = ""
+authors = ["Tommaso Biganzoli <tommasobiganzoli@gmail.com>"]
+
+readme = "README.md"
+packages = [{include = "app"}]
+
+[tool.poetry.dependencies]
+python =  ">=3.11,<3.14"
+crewai = "^0.186.1"
+pandas = "^2.3.2"
+yfinance = "^0.2.66"
+scipy = "^1.16.2"
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"

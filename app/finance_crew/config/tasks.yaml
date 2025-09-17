@@ -1,0 +1,37 @@
+market_data_task:
+  description: >
+    Collect and summarize financial data for the tickers in the portfolio related to {topic}.
+    Include: last prices, average daily returns, and annualized volatility.
+    Ensure the data reflects the current year {current_year}.
+  expected_output: >
+    A compact JSON-like summary with tickers as keys and values containing price,
+    mean return, and volatility.
+  agent: researcher
+
+risk_analysis_task:
+  description: >
+    Using the collected market data and portfolio weights, analyze key risks in {topic}.
+    Include portfolio annualized volatility, maximum drawdown, and a parametric 95% VaR.
+    Provide concise insights on concentration, asset class exposures, and vulnerabilities.
+  expected_output: >
+    A bullet list (5 items max) summarizing risk metrics and portfolio vulnerabilities.
+  agent: risk_analyst
+
+rebalancing_and_reporting_task:
+  description: >
+    Compare current portfolio weights with the target weights for {topic}.
+    Suggest trades (buy/sell quantities) to minimize deviation while respecting constraints:
+      - max 35% per single ticker
+      - min 2% allocation to cash if available
+      - no short positions
+    Then generate a comprehensive Markdown report that combines:
+      - Executive summary (3–4 lines, mention objective and key deltas vs target)
+      - Table: Current vs Target vs Proposed Weights
+      - Table: Key risk metrics (annualized vol, max drawdown, VaR95)
+      - 3 actionable recommendations aligned with the target allocation and risk posture
+    Be explicit about assumptions (pricing date range, any missing data) and cite constraints applied.
+  expected_output: >
+    JSON-like object with two fields:
+      suggested_trades: {ticker: qty_delta}
+      report_markdown: "<full markdown report without code fences>"
+  agent: rebalancer
