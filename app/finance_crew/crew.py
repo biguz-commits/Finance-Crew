@@ -2,13 +2,14 @@ from typing import List
 from crewai import Agent, Crew, Process, Task
 from crewai.project import CrewBase, agent, crew, task, tool
 from crewai.agents.agent_builder.base_agent import BaseAgent
+from dotenv import load_dotenv
 
+from crewai import LLM
 from app.finance_crew.tools.researcher_agent import (
     ReadPortfolioTickersTool,
     FetchYFinancePricesTool,
     ComputeMarketMetricsTool,
 )
-
 from app.finance_crew.tools.risk_analyst import (
     BuildPortfolioReturnsTool,
     PortfolioRiskMetricsTool,
@@ -18,11 +19,13 @@ from app.finance_crew.tools.risk_analyst import (
     DataQualityCheckTool,
 )
 
+load_dotenv()
+
+OPENROUTER_MODEL = "openrouter/mistralai/mistral-7b-instruct"
+OPENROUTER_API_BASE = "https://openrouter.ai/api/v1"
 
 @CrewBase
-class FinAssistCrew():
-    """FinAssist crew: Market Data → Risk → Rebalance+Report"""
-
+class FinAssistCrew:
     agents: List[BaseAgent]
     tasks: List[Task]
 
@@ -68,10 +71,16 @@ class FinAssistCrew():
             config=self.agents_config['researcher'],  # type: ignore[index]
             verbose=True,
             tools=[
-                self.read_portfolio_tickers_tool,
-                self.fetch_yfinance_prices_tool,
-                self.compute_market_metrics_tool,
+                self.read_portfolio_tickers_tool(),
+                self.fetch_yfinance_prices_tool(),
+                self.compute_market_metrics_tool(),
             ],
+            llm=LLM(
+                model=OPENROUTER_MODEL,
+                temperature=0.6,
+                max_tokens=2048,
+                api_base=OPENROUTER_API_BASE
+            ),
         )
 
     @agent
@@ -80,13 +89,19 @@ class FinAssistCrew():
             config=self.agents_config['risk_analyst'],  # type: ignore[index]
             verbose=True,
             tools=[
-                self.build_portfolio_returns_tool,
-                self.portfolio_risk_metrics_tool,
-                self.exposures_vs_target_tool,
-                self.concentration_metrics_tool,
-                self.beta_correlation_tool,
-                self.data_quality_check_tool,
+                self.build_portfolio_returns_tool(),
+                self.portfolio_risk_metrics_tool(),
+                self.exposures_vs_target_tool(),
+                self.concentration_metrics_tool(),
+                self.beta_correlation_tool(),
+                self.data_quality_check_tool(),
             ],
+            llm=LLM(
+                model=OPENROUTER_MODEL,
+                temperature=0.6,
+                max_tokens=2048,
+                api_base=OPENROUTER_API_BASE
+            ),
         )
 
     @agent
@@ -95,6 +110,12 @@ class FinAssistCrew():
             config=self.agents_config['rebalancer'],  # type: ignore[index]
             verbose=True,
             tools=[],
+            llm=LLM(
+                model=OPENROUTER_MODEL,
+                temperature=0.6,
+                max_tokens=2048,
+                api_base=OPENROUTER_API_BASE
+            ),
         )
 
     @task
